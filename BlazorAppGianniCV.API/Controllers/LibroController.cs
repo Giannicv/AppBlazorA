@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AppBlazor.Entities;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorAppGianniCV.API.Controllers
@@ -45,5 +46,30 @@ namespace BlazorAppGianniCV.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-    }
+        [HttpPost]
+        public IActionResult guardarLibro([FromBody] LibroFormCLS oLibroFormCLS)
+        {
+            try
+            {
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+        [HttpGet("recuperarArchivo/{idLibro}")]
+        public IActionResult recuperarArchivoPorId(int idLibro)
+        {
+            try
+            {
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
+    } 
 }
+
