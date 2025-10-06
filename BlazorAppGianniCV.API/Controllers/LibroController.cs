@@ -1,4 +1,5 @@
 ﻿using AppBlazor.Entities;
+using BlazorAppGianniCV.API.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
@@ -8,13 +9,29 @@ namespace BlazorAppGianniCV.API.Controllers
     [ApiController]
     public class LibroController : ControllerBase
     {
+        private readonly BdbibliotecaContext bd;
+        public LibroController(BdbibliotecaContext _bd)
+        {
+            bd = _bd;
+        }
         [HttpGet]
         public IActionResult listarLibros()
         {
             try
             {
-                return Ok();
-
+                var lista = (from libro in bd.Libros
+                             join tipolibro in bd.TipoLibros
+                             on libro.Iidtipolibro equals tipolibro.Iidtipolibro
+                             where libro.Bhabilitado == 1
+                             select new LibroListCLS
+                             {
+                                 idlibro = libro.Iidlibro,
+                                 titulo = libro.Titulo!,
+                                 imagen = libro.Fotocaratula,
+                                 nombrearchivo = libro.Nombrearchivo!,
+                                 nombretipolibro = tipolibro.Nombretipolibro!
+                             }).ToList();
+                return Ok(lista);
             }
             catch (Exception ex)
             {
@@ -22,12 +39,27 @@ namespace BlazorAppGianniCV.API.Controllers
             }
         }
         [HttpGet("{idLibro}")]
-        public IActionResult recuperaLibroPorId()
+        public IActionResult recuperaLibroPorId(int idlibro)
         {
             try
             {
-                return Ok();
-
+                var obj = bd.Libros.Where(p => p.Iidlibro == idlibro).FirstOrDefault();
+                if (obj == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    LibroFormCLS oLibroFormCLS = new LibroFormCLS();
+                    oLibroFormCLS.idLibro = obj.Iidlibro;
+                    oLibroFormCLS.titulo = obj.Titulo!;
+                    oLibroFormCLS.resumen = obj.Resumen!;
+                    oLibroFormCLS.idtipolibro = (int)obj.Iidtipolibro!;
+                    oLibroFormCLS.nombrearchivo = obj.Nombrearchivo!;
+                    oLibroFormCLS.archivo = obj.Libropdf;
+                    oLibroFormCLS.image = obj.Fotocaratula;
+                    return Ok(oLibroFormCLS);
+                }
             }
             catch (Exception ex)
             {

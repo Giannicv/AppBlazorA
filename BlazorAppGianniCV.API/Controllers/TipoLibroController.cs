@@ -1,4 +1,6 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using AppBlazor.Entities;
+using BlazorAppGianniCV.API.Models;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
 namespace BlazorAppGianniCV.API.Controllers
@@ -7,10 +9,21 @@ namespace BlazorAppGianniCV.API.Controllers
     [ApiController]
     public class TipoLibroController : ControllerBase
     {
+        private readonly BdbibliotecaContext bd;
+        public TipoLibroController(BdbibliotecaContext _bd) {
+            bd = _bd;
+        }
         [HttpGet]
         public IActionResult listarTipoLibros() {
             try {
-                return Ok();
+                var lista = (from tipolibro in bd.TipoLibros
+                             where tipolibro.Bhabilitado == 1
+                             select new TipoLibroCLS
+                             {
+                                 idtipolibro = tipolibro.Iidtipolibro,
+                                 nombretipolibro = tipolibro.Nombretipolibro!
+                             }).ToList();
+                return Ok(lista);
                
             }catch (Exception ex) {
                 return StatusCode(500, ex.Message);
