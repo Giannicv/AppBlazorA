@@ -1,117 +1,80 @@
 ﻿using AppBlazor.Entities;
-using System.ComponentModel;
-namespace AppBlazor.Client.Servicios
+using System.Net.Http.Headers;
+using System.Net.Http.Json;
+
+namespace AppBlazor.Client.Services
 {
     public class LibroService
     {
+        private readonly HttpClient http;
         private List<LibroListCLS> lista;
-        private TipoLibroService tipoLibroService;
-        public LibroService(TipoLibroService _tipolibroservice) {
-
-            tipoLibroService = _tipolibroservice;
-            lista =new List<LibroListCLS>();
-           
-            lista.Add(new LibroListCLS { idlibro=1, titulo="Caperucita Roja", nombretipolibro="Cuento" });
-            lista.Add(new LibroListCLS { idlibro = 2, titulo = "Don quijote de la Mancha ", nombretipolibro="Novela" });
-
-
-        }
-
-        public List<LibroListCLS> listarLibros() { 
-            
-        return lista;
-        }
-
-
-
-        public List<LibroListCLS> filtrarLibros(string nombretitulo)
+        private TipoLibroService tipolibroservice;
+        public LibroService(TipoLibroService _tipolibroService, HttpClient _http)
         {
-            List<LibroListCLS> l = listarLibros();
-            if (nombretitulo=="")
+            http = _http;
+            tipolibroservice = _tipolibroService;
+            lista = new List<LibroListCLS>();
+            //lista.Add(new LibroListCLS { idLibro = 1, titulo = "Caperucita Roja", nombretipolibro = "Cuento" });
+            //lista.Add(new LibroListCLS { idLibro = 2, titulo = "Don Quijote de la Mancha", nombretipolibro = "Novela" });
+        }
+        public async Task<List<LibroListCLS>> listarLibros()
+        {
+            try
             {
-                return l;
+                var response = await http.GetFromJsonAsync<List<LibroListCLS>>("api/Libro");
+                if (response == null)
+                {
+                    return new List<LibroListCLS>();
+                }
+                else
+                {
+                    return response;
+                }
             }
-            else
+            catch
             {
-                List<LibroListCLS> listafiltrada=l.Where(p=>p.titulo.ToUpper().Contains(nombretitulo.ToUpper())).ToList();
-                return listafiltrada;
+                return new List<LibroListCLS>();
             }
         }
-
-
-
-        public void eliminarLibro(int idlibro) { 
-        var listaQueda = lista.Where(p=>p.idlibro!=idlibro).ToList();
+        public void eliminarLibro(int idLibro)
+        {
+            var listaQueda = lista.Where(p => p.idlibro != idLibro).ToList();
             lista = listaQueda;
         }
-
-
-
-        public LibroFormCLS recuperaLibroPorId(int idlibro)
+        public async Task<LibroFormCLS> recuperarLibroPorId(int idLibro)
         {
-
-            var obj = lista.Where(p => p.idlibro == idlibro).FirstOrDefault();
-
-            if (obj != null)
-
+            try
             {
-
-                return new LibroFormCLS
+                var response = await http.GetFromJsonAsync<LibroFormCLS>("api/Libro/" + idLibro);
+                if (response == null)
                 {
-                    idLibro = obj.idlibro,
-                    titulo = obj.titulo,
-                    resumen = "Resumen",
-
-                    idtipolibro = tipoLibroService.obtenerIdTipoLibro(obj.nombretipolibro),
-                    image = obj.imagen,
-
-                    nombrearchivo = obj.nombrearchivo
-                };
-
+                    return new LibroFormCLS();
+                }
+                else
+                {
+                    return response;
+                }
             }
-
-            else
-
+            catch
             {
-
                 return new LibroFormCLS();
-
             }
-
         }
-
-
-        public string recuperarArchivoPorId(int idlibro)
+        public void guardarLibro(LibroFormCLS oLibroFormCLS)
         {
-            var obj = lista.Where(p => p.idlibro == idlibro).FirstOrDefault();
-            if (obj != null && obj.archivo != null)
+
+            if (oLibroFormCLS.idLibro == 0)
             {
-                return Convert.ToBase64String(obj.archivo);
-            }
-            else
-            {
-                return "";
-            }
-        }
-
-        public void guardarLibro(LibroFormCLS oLibroFormCLS) {
-
-
-
-
-            if (oLibroFormCLS.idLibro==0)
-            {
-                int idLibro = lista.Select(p => p.idlibro).Max() + 1;
-
+                int idlibro = lista.Select(p => p.idlibro).Max() + 1;
                 lista.Add(new LibroListCLS
                 {
-                    idlibro = idLibro,
+                    idlibro = idlibro,
                     titulo = oLibroFormCLS.titulo,
-                    nombretipolibro = tipoLibroService.obtenerNombreTipoLibro(oLibroFormCLS.idtipolibro),
+                    nombretipolibro = tipolibroservice.obtenerNombreTipoLibro(oLibroFormCLS.idtipolibro),
                     imagen = oLibroFormCLS.image,
 
                     archivo = oLibroFormCLS.archivo,
-                    nombrearchivo=oLibroFormCLS.nombrearchivo
+                    nombrearchivo = oLibroFormCLS.nombrearchivo
                 });
             }
             else
@@ -120,20 +83,54 @@ namespace AppBlazor.Client.Servicios
                 if (obj != null)
                 {
                     obj.titulo = oLibroFormCLS.titulo;
-                    obj.nombretipolibro = tipoLibroService.obtenerNombreTipoLibro(oLibroFormCLS.idtipolibro);
+                    obj.nombretipolibro = tipolibroservice.obtenerNombreTipoLibro(oLibroFormCLS.idtipolibro);
                     obj.imagen = oLibroFormCLS.image;
 
                     obj.archivo = oLibroFormCLS.archivo;
                     obj.nombrearchivo = oLibroFormCLS.nombrearchivo;
                 }
             }
-
-
+        }
+        public async Task<string> recuperarArchivoPorId(int idLibro)
+        {
+            try
+            {
+                var response = await http.GetFromJsonAsync<byte[]>("api/Libro/recuperarArchivo/" + idLibro);
+                if (response == null)
+                {
+                    return "";
+                }
+                else
+                {
+                    return Convert.ToBase64String(response);
+                }
+            }
+            catch
+            {
+                return "";
+            }
         }
 
-
-       
-
-
+        public async Task<List<LibroListCLS>> filtrarLibros(string nombretitulo)
+        {
+            List<LibroListCLS> l = await listarLibros();
+            if (nombretitulo == "")
+            {
+                return l;
+            }
+            else
+            {
+                List<LibroListCLS> listafiltrada = l.Where(p => p.titulo.ToUpper().Contains(nombretitulo.ToUpper())).ToList();
+                return listafiltrada;
+            }
+        }
+        public event Func<string, Task> OnSearch = delegate { return Task.CompletedTask; };
+        public async Task notificarBusqueda(string titulolibro)
+        {
+            if (OnSearch != null)
+            {
+                await OnSearch.Invoke(titulolibro);
+            }
+        }
     }
 }

@@ -38,7 +38,7 @@ namespace BlazorAppGianniCV.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
-        [HttpGet("{idLibro}")]
+        [HttpGet("{idlibro}")]
         public IActionResult recuperaLibroPorId(int idlibro)
         {
             try
@@ -71,7 +71,17 @@ namespace BlazorAppGianniCV.API.Controllers
         {
             try
             {
-                return Ok();
+                var obj = bd.Libros.Where(p => p.Iidlibro == idLibro).FirstOrDefault();
+                if (obj == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    obj.Bhabilitado = 0;
+                    bd.SaveChanges();
+                    return Ok("Se elimino correctamente");
+                }
             }
             catch (Exception ex)
             {
