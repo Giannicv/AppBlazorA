@@ -1,5 +1,6 @@
 using AppBlazor.Client;
 using AppBlazor.Client.Services;
+using AppBlazor.Client.Servicios;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 
@@ -13,5 +14,7 @@ builder.Services.AddScoped(sp => new HttpClient
 builder.Services.AddScoped<LibroService>();
 
 builder.Services.AddScoped<TipoLibroService>();
+
+builder.Services.AddScoped<AutorService>();
 
 await builder.Build().RunAsync();

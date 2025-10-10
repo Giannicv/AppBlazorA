@@ -1,10 +1,26 @@
-﻿@inject NavigationManager navigationManager
+﻿@inject IJSRuntime JS
+
+@inject NavigationManager navigationManager
+
 @inject LibroService libroService
-@inject IJSRuntime JS
+
+@inject LibroService libroService
+
+
+<div class="input-group mt-3 mb-3">
+    <input type="text" class="form-control" placeholder="lngrese titulo del libro"
+           @bind-value="nombretitulo"
+           @bind-value:event="oninput" />
+
+    <button @onclick="buscar" class="btn btn-outline-dark" type="button">Buscar</button>
+    <button @onclick="limpiar" class="btn btn-outline-danger" type="button">Limpiar</button>
+
+</div>
 
 @if (lista != null && lista.Count != 0)
+
 {
-    <table class="table mt-3 mb-3">
+    <table class="table">
         <thead>
             <tr>
                 <th>Imagen</th>
@@ -14,20 +30,16 @@
                 <th>Nombre Archivo</th>
                 <th>Operaciones</th>
             </tr>
+
         </thead>
         <tbody>
+
             @foreach (var item in lista)
+
             {
                 <tr>
                     <td>
-                        @if (item.imagen == null)
-                        {
-                            <img width=" 50" height="50" src="img/default.png" />
-                        }
-                        else
-                        {
-                            <img width=" 50" height="50" src="@obtenerImagen(item.imagen)" />
-                        }
+                        <img width="50" height="50" src="@obtenerImagen(item.imagen)" />
                     </td>
                     <td>@item.idlibro</td>
                     <td>@item.titulo</td>
@@ -35,8 +47,8 @@
                     <td><p @onclick="(() => descargar(item.idlibro, item.nombrearchivo))" style="cursor:pointer; text-decoration:underline">@item.nombrearchivo</p></td>
                     <td>
                         <button class="btn btn-primary" @onclick="(() => recuperarLibro(item.idlibro))">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-through-heart-fill" viewBox="0 0 16 16">
-                                <path fill-rule="evenodd" d="M2.854 15.854A.5.5 0 0 1 2 15.5V14H.5a.5.5 0 0 1-.354-.854l1.5-1.5A.5.5 0 0 1 2 11.5h1.793l3.103-3.104a.5.5 0 1 1 .708.708L4.5 12.207V14a.5.5 0 0 1-.146.354zM16 3.5a.5.5 0 0 1-.854.354L14 2.707l-1.006 1.006c.236.248.44.531.6.845.562 1.096.585 2.517-.213 4.092-.793 1.563-2.395 3.288-5.105 5.08L8 13.912l-.276-.182A24 24 0 0 1 5.8 12.323L8.31 9.81a1.5 1.5 0 0 0-2.122-2.122L3.657 10.22a9 9 0 0 1-1.039-1.57c-.798-1.576-.775-2.997-.213-4.093C3.426 2.565 6.18 1.809 8 3.233c1.25-.98 2.944-.928 4.212-.152L13.292 2 12.147.854A.5.5 0 0 1 12.5 0h3a.5.5 0 0 1 .5.5z" />
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
+                                <path d="m13.498.795.149-.149a1.207 1.207 0 1 1 1.707 1.708l-.149.148a1.5 1.5 0 0 1-.059 2.059L4.854 14.854a.5.5 0 0 1-.233.131l-4 1a.5.5 0 0 1-.606-.606l1-4a.5.5 0 0 1 .131-.232l9.642-9.642a.5.5 0 0 0-.642.056L6.854 4.854a.5.5 0 1 1-.708-.708L9.44.854A1.5 1.5 0 0 1 11.5.796a1.5 1.5 0 0 1 1.998-.001" />
                             </svg>
                         </button>
                         <button class="btn btn-danger" @onclick="(() => eliminarLibro(item.idlibro))">
@@ -47,10 +59,13 @@
                         </button>
                     </td>
                 </tr>
+
             }
         </tbody>
     </table>
+
 }
+
 
 @code {
     private async Task descargar(int idlibro, string nombrearchivo)
@@ -62,49 +77,86 @@
         }
     }
 
+
     private string obtenerImagen(byte[]? buffer)
+
     {
+
         if (buffer == null)
+
         {
+
             return "img/nofoto.png";
+
         }
+
         else
+
         {
+
             return "data:image/png;base64," + Convert.ToBase64String(buffer);
+
         }
+
     }
+
     public List<LibroListCLS> lista { get; set; } = new List<LibroListCLS>();
+
     protected override async Task OnInitializedAsync()
+
     {
+
         await listarLibros();
     }
 
+
     private async Task listarLibros()
+
     {
+
         lista = await libroService.listarLibros();
+
     }
+
     private void recuperarLibro(int idlibro)
+
     {
+
         navigationManager.NavigateTo("/formlibro/edit/" + idlibro);
+
     }
+
     private async Task eliminarLibro(int idlibro)
+
     {
-        libroService.eliminarLibro(idlibro);
+
+        await libroService.eliminarLibro(idlibro);
+
         await listarLibros();
+
     }
+
     private async Task limpiar()
+
     {
+
         nombretitulo = "";
+
         lista = await libroService.filtrarLibros(nombretitulo);
+
     }
 
 
     public string nombretitulo { get; set; } = string.Empty;
 
     private async Task buscar()
+
     {
+
         lista = await libroService.filtrarLibros(nombretitulo);
+
         StateHasChanged();
+
     }
 
 

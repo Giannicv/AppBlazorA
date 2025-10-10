@@ -2,30 +2,53 @@
 @inject LibroService libroService
 @inject TipoLibroService tipoLibroService
 @inject IJSRuntime JS
+@inject AutorService autorService
 <h2>@titulo</h2>
-<EditForm Model="@oLibroFormCLS" OnValidSubmit="@guardar">
+
+<EditForm Model="@oLibroFormCLS" OnvalidSubmit="@guardar">
     <DataAnnotationsValidator />
     <div class="mt-3">
         <label>Id Libro</label>
         <InputNumber readonly class="form-control" @bind-Value="oLibroFormCLS.idLibro" />
         <ValidationMessage For="(() => oLibroFormCLS.idLibro)" />
     </div>
+
     <div class="mt-3">
         <label>Titulo</label>
         <InputText class="form-control" @bind-Value="oLibroFormCLS.titulo" />
         <ValidationMessage For="(() => oLibroFormCLS.titulo)" />
     </div>
+
+
     <div class="mt-3">
-        <label>Seleccione Tipo de Libro</label>
+        <label>Seleccionar tipo de libro</label>
         <InputSelect class="form-control" @bind-Value="oLibroFormCLS.idtipolibro">
-            <option value="0">--Seleccione--</option>
+            <option value="0"> --Seleccione-- </option>
             @foreach (var item in listatipo)
             {
-                <option value="@item.idtipolibro">@item.nombretipolibro</option>
+                <option value="@item.idtipolibro"> @item.nombretipolibro </option>
             }
+
         </InputSelect>
         <ValidationMessage For="(() => oLibroFormCLS.idtipolibro)" />
+
     </div>
+
+    <div class="mt-3">
+        <label>Seleccione el autor</label>
+        <InputSelect @bind-Value="oLibroFormCLS.idautor">
+            <option value="0">--Seleccione--</option>
+            @foreach (var item in listaautor)
+            {
+                <option value="@item.idautor">@item.nombreautor</option>
+            }
+        </InputSelect>
+        <ValidationMessage For="() => oLibroFormCLS.idautor" />
+    </div>
+
+
+
+
     <div class="mt-3">
         <label>Resumen</label>
         <InputTextArea class="form-control" @bind-Value="oLibroFormCLS.resumen" />
@@ -40,20 +63,23 @@
         <InputFile OnChange="HandleSelected" accept="image/*" />
     </div>
 
-    <div class="mt-3">
-        <p>Seleccionar el libro a subir </p>
-        <InputFile OnChange="HandleFileSelected" accept=".pdf"></InputFile>
+
+    <div class="mt-4">
+        <p>Seleccionar el Libro a subir</p>
+        <InputFile OnChange="HandleFileSelected" accept=".pdf" />
         <p @onclick="(() => descargar(oLibroFormCLS.idLibro, oLibroFormCLS.nombrearchivo))" style="cursor:pointer; text-decoration:underline">@oLibroFormCLS.nombrearchivo</p>
     </div>
-    <div class="mt-3">
+
+
+    <div>
         <button type="submit" class="btn btn-success">Guardar</button>
         <button @onclick="@regresar" class="btn btn-danger">Regresar</button>
     </div>
 
 </EditForm>
 
-
 @code {
+
     private async Task descargar(int idlibro, string nombrearchivo)
     {
         string archivo = await libroService.recuperarArchivoPorId(idlibro);
@@ -62,48 +88,69 @@
             await JS.InvokeVoidAsync("descargarArchivo", archivo, nombrearchivo);
         }
     }
-    private string? imagePreview = "/img/nofoto.png";
-    private async Task HandleSelected(InputFileChangeEventArgs e)
-    {
-        var file = e.File;
-        if (file != null)
-        {
-            var buffer = new byte[file.Size];
-            await file.OpenReadStream().ReadAsync(buffer);
 
-            imagePreview = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
-            oLibroFormCLS.image = buffer;
-        }
-    }
     private async Task HandleFileSelected(InputFileChangeEventArgs e)
     {
+
+        //Obtener el archivo seleccionado
         var file = e.File;
+
+
         oLibroFormCLS.nombrearchivo = file.Name;
 
         if (file != null)
         {
             oLibroFormCLS.archivo = new byte[file.Size];
             await file.OpenReadStream().ReadAsync(oLibroFormCLS.archivo);
+
         }
     }
 
+
+
+
+    private string? imagePreview = "/img/nofoto.png";
+
+    private async Task HandleSelected(InputFileChangeEventArgs e)
+    {
+
+        //Obtener el archivo seleccionado
+        var file = e.File;
+        if (file != null)
+        {
+            //leer la imagen  como byte[]
+            var buffer = new byte[file.Size];
+            await file.OpenReadStream().ReadAsync(buffer);
+
+            //Convertir la imagen a base64 para mostrarla como una URL
+            imagePreview = $"data:{file.ContentType};base64,{Convert.ToBase64String(buffer)}";
+
+
+            oLibroFormCLS.image = buffer;
+
+        }
+    }
+
+
+
+
     public LibroFormCLS oLibroFormCLS { get; set; } = new LibroFormCLS();
+
     [Parameter]
-    public int idLibro { get; set; }
+    public int idlibro { get; set; }
+
     public string titulo { get; set; } = "";
 
     public List<TipoLibroCLS> listatipo { get; set; } = new List<TipoLibroCLS>();
-
+    public List<AutorCLS> listaautor { get; set; } = new List<AutorCLS>();
     protected override async Task OnInitializedAsync()
     {
         listatipo = await tipoLibroService.listarTipoLibros();
-        if (idLibro == 0)
-        {
-            titulo = "Agregar Libro";
-        }
+        listaautor = await autorService.listarAutores();
+        if (idlibro == 0) titulo = "Agregar Libro";
         else
         {
-            oLibroFormCLS = await libroService.recuperarLibroPorId(idLibro);
+            oLibroFormCLS = await libroService.recuperarLibroPorId(idlibro);
             titulo = "Editar Libro" + oLibroFormCLS.titulo;
             if (oLibroFormCLS.image != null)
             {
@@ -111,14 +158,17 @@
             }
         }
 
+
     }
-    private void guardar()
+
+    public void guardar()
     {
         libroService.guardarLibro(oLibroFormCLS);
         navigationManager.NavigateTo("libro");
     }
+
     private void regresar()
     {
-        navigationManager.NavigateTo("/libro");
+        navigationManager.NavigateTo("libro");
     }
 }

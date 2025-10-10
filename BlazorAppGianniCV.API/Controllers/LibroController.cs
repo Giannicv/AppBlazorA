@@ -58,6 +58,7 @@ namespace BlazorAppGianniCV.API.Controllers
                     oLibroFormCLS.nombrearchivo = obj.Nombrearchivo!;
                     oLibroFormCLS.archivo = obj.Libropdf;
                     oLibroFormCLS.image = obj.Fotocaratula;
+                    oLibroFormCLS.idautor=(int)obj.Iidautor!;
                     return Ok(oLibroFormCLS);
                 }
             }
@@ -89,29 +90,26 @@ namespace BlazorAppGianniCV.API.Controllers
             }
         }
         [HttpPost]
-        public IActionResult guardarLibro([FromBody] LibroFormCLS oLibroFormCLS)
-        {
-            try
-            {
-                return Ok();
-            }
-            catch (Exception ex)
-            {
-                return StatusCode(500, ex.Message);
-            }
-        }
         [HttpGet("recuperarArchivo/{idLibro}")]
         public IActionResult recuperarArchivoPorId(int idLibro)
         {
             try
             {
-                return Ok();
+                var obj = bd.Libros.Where(p => p.Iidlibro == idLibro).FirstOrDefault();
+                if (obj == null)
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    return Ok(obj.Libropdf);
+                }
             }
             catch (Exception ex)
             {
                 return StatusCode(500, ex.Message);
             }
         }
-    } 
+    }
 }
 

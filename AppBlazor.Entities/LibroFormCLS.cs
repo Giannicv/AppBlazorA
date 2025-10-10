@@ -26,5 +26,6 @@ namespace AppBlazor.Entities
 
         public string nombrearchivo { get; set; } = null!;
 
+        public int idautor { get; set; }
     }
 }
