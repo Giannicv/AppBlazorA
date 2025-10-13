@@ -117,11 +117,26 @@ namespace AppBlazor.Client.Servicios
             }
         }
 
-        public void guardarLibro(LibroFormCLS oLibroFormCLS)
+        public async Task<string> guardarLibro(LibroFormCLS oLibroFormCLS)
         {
 
-
-
+            try
+            {
+                var response = await http.PostAsJsonAsync("api/Libro", oLibroFormCLS);
+                if (response.IsSuccessStatusCode)
+                {
+                    return await response.Content.ReadAsStringAsync();
+                }
+                else
+                {
+                    return "Error: " + await response.Content.ReadAsStringAsync();
+                }
+            }
+            catch (Exception ex)
+            {
+                return "Error: " + ex.Message;
+            }
+            /*
             if (oLibroFormCLS.idLibro == 0)
             {
                 int idLibro = lista.Select(p => p.idlibro).Max() + 1;
@@ -153,10 +168,11 @@ namespace AppBlazor.Client.Servicios
 
 
         }
+            */
 
 
 
 
-
+        }
     }
 }

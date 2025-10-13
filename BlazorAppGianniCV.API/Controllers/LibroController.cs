@@ -59,6 +59,8 @@ namespace BlazorAppGianniCV.API.Controllers
                     oLibroFormCLS.archivo = obj.Libropdf;
                     oLibroFormCLS.image = obj.Fotocaratula;
                     oLibroFormCLS.idautor=(int)obj.Iidautor!;
+                    oLibroFormCLS.numeropaginas = (int)obj.Numpaginas!;
+                    oLibroFormCLS.stock = (int)obj.Stock!;
                     return Ok(oLibroFormCLS);
                 }
             }
@@ -90,6 +92,55 @@ namespace BlazorAppGianniCV.API.Controllers
             }
         }
         [HttpPost]
+        public IActionResult guardarLibro([FromBody] LibroFormCLS oLibroFormCLS)
+        {
+            try
+            {
+                if (oLibroFormCLS.idLibro == 0)
+                {
+                    Libro oLibro = new Libro();
+                    oLibro.Titulo = oLibroFormCLS.titulo;
+                    oLibro.Resumen = oLibroFormCLS.resumen;
+                    oLibro.Numpaginas = oLibroFormCLS.numeropaginas;
+                    oLibro.Stock = oLibroFormCLS.stock;
+                    oLibro.Iidtipolibro = oLibroFormCLS.idtipolibro;
+                    oLibro.Iidautor = oLibroFormCLS.idautor;
+                    oLibro.Fotocaratula = oLibroFormCLS.image;
+                    oLibro.Libropdf = oLibroFormCLS.archivo;
+                    oLibro.Nombrearchivo = oLibroFormCLS.nombrearchivo;
+                    oLibro.Bhabilitado = 1;
+                    bd.Libros.Add(oLibro);
+                    bd.SaveChanges();
+                }
+                else
+                {
+                    var obj = bd.Libros.Where(p => p.Iidlibro == oLibroFormCLS.idLibro).FirstOrDefault();
+                    if (obj == null)
+                    {
+                        return NotFound();
+                    }
+                    else
+                    {
+                        obj.Titulo = oLibroFormCLS.titulo;
+                        obj.Resumen = oLibroFormCLS.resumen;
+                        obj.Iidtipolibro = oLibroFormCLS.idtipolibro;
+                        obj.Nombrearchivo = oLibroFormCLS.nombrearchivo;
+                        obj.Libropdf = oLibroFormCLS.archivo;
+                        obj.Fotocaratula = oLibroFormCLS.image;
+                        obj.Iidautor = oLibroFormCLS.idautor;
+                        obj.Numpaginas = oLibroFormCLS.numeropaginas;
+                        obj.Stock = oLibroFormCLS.stock;
+                        bd.SaveChanges();
+                        return Ok("Se actualizo correctamente");
+                    }
+                }
+                return Ok("Se guardo correctamente");
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, ex.Message);
+            }
+        }
         [HttpGet("recuperarArchivo/{idLibro}")]
         public IActionResult recuperarArchivoPorId(int idLibro)
         {
@@ -110,6 +161,7 @@ namespace BlazorAppGianniCV.API.Controllers
                 return StatusCode(500, ex.Message);
             }
         }
+        
     }
 }
 

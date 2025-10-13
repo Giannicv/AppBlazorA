@@ -26,6 +26,11 @@ namespace AppBlazor.Entities
 
         public string nombrearchivo { get; set; } = null!;
 
+        [Range(1, int.MaxValue, ErrorMessage = "Debe seleccionar un autor")]
         public int idautor { get; set; }
+        [Range(1, 5000, ErrorMessage = "Debe ingresar un numero de pagnas mayor a 0 y menor o igual a 5000")]
+        public int numeropaginas { get; set; }
+        [Range(1, int.MaxValue, ErrorMessage = "Debe ingresar un stock mayor a 0")]
+        public int stock { get; set; }
     }
 }
