@@ -18,5 +18,7 @@ namespace AppBlazor.Entities
         public byte[]? archivo { get; set; }
 
         public string nombrearchivo { get; set; } = string.Empty;
+
+        public string nombreautor { get; set; } = string.Empty;
     }
 }

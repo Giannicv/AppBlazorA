@@ -6,6 +6,7 @@
 
 @inject LibroService libroService
 
+@inject UtilService utilService
 
 <div class="input-group mt-3 mb-3">
     <input type="text" class="form-control" placeholder="lngrese titulo del libro"
@@ -39,12 +40,12 @@
             {
                 <tr>
                     <td>
-                        <img width="50" height="50" src="@obtenerImagen(item.imagen)" />
+                        <img width="50" height="50" src="@utilService.obternerImagen(item.imagen)" />
                     </td>
                     <td>@item.idlibro</td>
                     <td>@item.titulo</td>
                     <td>@item.nombretipolibro</td>
-                    <td><p @onclick="(() => descargar(item.idlibro, item.nombrearchivo))" style="cursor:pointer; text-decoration:underline">@item.nombrearchivo</p></td>
+                    <td><p @onclick="(() => libroService.descargar(item.idlibro, item.nombrearchivo))" style="cursor:pointer; text-decoration:underline">@item.nombrearchivo</p></td>
                     <td>
                         <button class="btn btn-primary" @onclick="(() => recuperarLibro(item.idlibro))">
                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-pen-fill" viewBox="0 0 16 16">
@@ -68,37 +69,7 @@
 
 
 @code {
-    private async Task descargar(int idlibro, string nombrearchivo)
-    {
-        string archivo = await libroService.recuperarArchivoPorId(idlibro);
-        if (archivo != null && archivo.Length > 0)
-        {
-            await JS.InvokeVoidAsync("descargarArchivo", archivo, nombrearchivo);
-        }
-    }
-
-
-    private string obtenerImagen(byte[]? buffer)
-
-    {
-
-        if (buffer == null)
-
-        {
-
-            return "img/nofoto.png";
-
-        }
-
-        else
-
-        {
-
-            return "data:image/png;base64," + Convert.ToBase64String(buffer);
-
-        }
-
-    }
+   
 
     public List<LibroListCLS> lista { get; set; } = new List<LibroListCLS>();
 

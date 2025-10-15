@@ -1,5 +1,6 @@
 ﻿using AppBlazor.Client.Services;
 using AppBlazor.Entities;
+using Microsoft.JSInterop;
 using System.ComponentModel;
 using System.Net.Http.Json;
 namespace AppBlazor.Client.Servicios
@@ -10,11 +11,13 @@ namespace AppBlazor.Client.Servicios
         private TipoLibroService tipoLibroService;
 
         private readonly HttpClient http;
+        private readonly IJSRuntime jsRuntime;
 
-        public LibroService(TipoLibroService _tipolibroservice, HttpClient _http)
+        public LibroService(TipoLibroService _tipolibroservice, HttpClient _http, IJSRuntime _jsRuntime)
         {
 
             http = _http;
+            jsRuntime= _jsRuntime;
             tipoLibroService = _tipolibroservice;
             lista = new List<LibroListCLS>();
             // lista.Add(new LibroListCLS { idlibro=1, titulo="Caperucita Roja", nombretipolibro="Cuento" });
@@ -173,6 +176,14 @@ namespace AppBlazor.Client.Servicios
 
 
 
+        }
+        public async Task descargar(int idlibro , string nombrearchivo)
+        {
+            string archivo = await recuperarArchivoPorId(idlibro);
+            if (archivo != null && archivo.Length > 0)
+            {
+                await jsRuntime.InvokeVoidAsync("descargarArchivo", archivo, nombrearchivo);
+            }
         }
     }
 }

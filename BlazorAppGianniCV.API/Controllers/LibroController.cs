@@ -22,6 +22,8 @@ namespace BlazorAppGianniCV.API.Controllers
                 var lista = (from libro in bd.Libros
                              join tipolibro in bd.TipoLibros
                              on libro.Iidtipolibro equals tipolibro.Iidtipolibro
+                             join autor in bd.Autors
+                             on libro.Iidautor equals autor.Iidautor
                              where libro.Bhabilitado == 1
                              select new LibroListCLS
                              {
@@ -29,7 +31,8 @@ namespace BlazorAppGianniCV.API.Controllers
                                  titulo = libro.Titulo!,
                                  imagen = libro.Fotocaratula,
                                  nombrearchivo = libro.Nombrearchivo!,
-                                 nombretipolibro = tipolibro.Nombretipolibro!
+                                 nombretipolibro = tipolibro.Nombretipolibro!,
+                                 nombreautor=autor.Nombre + " " + autor.Appaterno + " " + autor.Apmaterno
                              }).ToList();
                 return Ok(lista);
             }

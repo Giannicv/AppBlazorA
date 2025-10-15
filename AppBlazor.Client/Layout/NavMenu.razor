@@ -8,6 +8,17 @@
 </div>
 
 <div class="@NavMenuCssClass nav-scrollable" @onclick="ToggleNavMenu">
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="libro">
+            <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> libro
+        </NavLink>
+    </div>
+    <div class="nav-item px-3">
+        <NavLink class="nav-link" href="galeria" Match="NavLinkMatch.All">
+            <span class="bi bi-house-door-fill-nav-menu" aria-hidden="true"></span> Galeria
+        </NavLink>
+    </div>
+    
     <nav class="flex-column">
         <div class="nav-item px-3">
             <NavLink class="nav-link" href="" Match="NavLinkMatch.All">
@@ -25,11 +36,7 @@
             </NavLink>
         </div>
 
-        <div class="nav-item px-3">
-            <NavLink class="nav-link" href="libro">
-                <span class="bi bi-list-nested-nav-menu" aria-hidden="true"></span> libro
-            </NavLink>
-        </div>
+
     </nav>
 </div>
 

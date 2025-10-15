@@ -13,6 +13,8 @@ builder.Services.AddScoped(sp => new HttpClient
 
 builder.Services.AddScoped<LibroService>();
 
+builder.Services.AddScoped<UtilService>();
+
 builder.Services.AddScoped<TipoLibroService>();
 
 builder.Services.AddScoped<AutorService>();
