@@ -26,7 +26,12 @@
     public List<LibroListCLS> lista { get; set; } = new List<LibroListCLS>();
     protected override async Task OnInitializedAsync()
     {
-        lista = await libroService.listarLibros();    
+        lista = await libroService.listarLibros();
+        libroService.OnSearchGaleria += filtrarGaleria;
     }
-
+    public async Task filtrarGaleria(int idtipolibro, int idautor)
+    {
+        lista = await libroService.filtrarGaleria(idtipolibro, idautor);
+        StateHasChanged();
+    }
 }

@@ -32,7 +32,9 @@ namespace BlazorAppGianniCV.API.Controllers
                                  imagen = libro.Fotocaratula,
                                  nombrearchivo = libro.Nombrearchivo!,
                                  nombretipolibro = tipolibro.Nombretipolibro!,
-                                 nombreautor=autor.Nombre + " " + autor.Appaterno + " " + autor.Apmaterno
+                                 nombreautor=autor.Nombre + " " + autor.Appaterno + " " + autor.Apmaterno,
+                                 idtipolibro=(int) libro.Iidtipolibro!,
+                                 idautor=(int) libro.Iidautor!
                              }).ToList();
                 return Ok(lista);
             }

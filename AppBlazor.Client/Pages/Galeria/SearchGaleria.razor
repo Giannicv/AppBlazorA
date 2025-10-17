@@ -1,0 +1,48 @@
+﻿@inject TipoLibroService tipoLibroService
+@inject AutorService autorService
+@inject LibroService libroService
+<div class="input-group mt-3 mb-3">
+    <span class="input-group-text">Tipo Libro</span>
+    <select @bind-value="idtipolibro" @bind-value:event="oninput" class="form-control">
+        <option value="0">--Seleccione--</option>
+        @foreach (var tipolibro in listatipolibro)
+        {
+            <option value="@tipolibro.idtipolibro">@tipolibro.nombretipolibro</option>
+        }
+    </select>
+    <span class="input-group-text">Autor</span>
+    <select @bind-value="idautor" @bind-value:event="oninput" class="form-control">
+        <option value="0">---Seleccione---</option>
+        @foreach (var autor in listaautor)
+        {
+            <option value="@autor.idautor">@autor.nombreautor</option>
+        }
+    </select>
+    <button @onclick="buscar" class="btn btn-outline-dark" type="button">Buscar</button>
+    <button @onclick="limpiar" class="btn btn-outline-danger" type="button">Limpiar</button>
+</div>
+
+@code {
+    public int idtipolibro { get; set; }
+    public List<TipoLibroCLS> listatipolibro { get; set; } = new List<TipoLibroCLS>();
+
+    public int idautor { get; set; }
+    public List<AutorCLS> listaautor { get; set; } = new List<AutorCLS>();
+    protected override async Task OnInitializedAsync()
+    {
+        listatipolibro = await tipoLibroService.listarTipoLibros();
+        listaautor = await autorService.listarAutores();
+    }
+
+    public async Task buscar()
+    {
+        await libroService.notificarBusquedaGaleria(idtipolibro, idautor);
+    }
+
+    public async Task limpiar()
+    {
+        idtipolibro = 0;
+        idautor = 0;
+        await libroService.notificarBusquedaGaleria(idtipolibro, idautor);
+    }
+}

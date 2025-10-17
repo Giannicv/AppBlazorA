@@ -13,6 +13,15 @@ namespace AppBlazor.Client.Servicios
         private readonly HttpClient http;
         private readonly IJSRuntime jsRuntime;
 
+        public event Func<string, Task> OnSearch = delegate { return Task.CompletedTask; };
+        public event Func<int, int, Task> OnSearchGaleria = delegate { return Task.CompletedTask; };
+        public async Task notificarBusquedaGaleria(int idtipolibro, int idautor)
+        {
+            if (OnSearchGaleria != null)
+            {
+                await OnSearchGaleria.Invoke(idtipolibro, idautor);
+            }
+        }
         public LibroService(TipoLibroService _tipolibroservice, HttpClient _http, IJSRuntime _jsRuntime)
         {
 
@@ -47,7 +56,23 @@ namespace AppBlazor.Client.Servicios
             }
         }
 
-
+        public async Task<List<LibroListCLS>> filtrarGaleria(int idtipolibro, int idautor)
+        {
+            List<LibroListCLS> listafiltrada = await listarLibros();
+            if(idtipolibro==0 && idautor == 0)
+            {
+                return listafiltrada;
+            }
+            if (idtipolibro != 0)
+            {
+                listafiltrada = listafiltrada.Where(p => p.idtipolibro == idtipolibro).ToList();
+            }
+            if (idautor != 0)
+            {
+                listafiltrada = listafiltrada.Where(p => p.idautor == idautor).ToList();
+            }
+            return listafiltrada;
+        }
 
         public async Task<List<LibroListCLS>> filtrarLibros(string nombretitulo)
         {
