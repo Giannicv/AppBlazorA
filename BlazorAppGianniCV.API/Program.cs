@@ -8,7 +8,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddDbContext<BdbibliotecaContext>(option =>
 {
-    option.UseSqlServer("Server=b403-13\\SQLEXPRESS;Database=BDBIBLIOTECA;Integrated Security=True;Encrypt=False");
+    option.UseSqlServer("Server=b403-14\\PROGWA;Database=BDBIBLIOTECA;Integrated Security=True;Encrypt=False");
 });
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();

@@ -3,6 +3,9 @@ using BlazorAppGianniCV.API.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 
+// Importar el namespace de logging
+using Microsoft.Extensions.Logging;
+
 namespace BlazorAppGianniCV.API.Controllers
 {
     [Route("api/[controller]")]
@@ -10,15 +13,22 @@ namespace BlazorAppGianniCV.API.Controllers
     public class LibroController : ControllerBase
     {
         private readonly BdbibliotecaContext bd;
-        public LibroController(BdbibliotecaContext _bd)
+
+        // 1. Declarar la variable del Logger
+        private readonly ILogger<LibroController> _logger;
+
+        public LibroController(BdbibliotecaContext _bd, ILogger<LibroController> logger)
         {
             bd = _bd;
+            _logger = logger;
         }
         [HttpGet]
         public IActionResult listarLibros()
         {
             try
             {
+                _logger.LogInformation("Iniciando la recuperación de la lista de libros."); //LOG 
+
                 var lista = (from libro in bd.Libros
                              join tipolibro in bd.TipoLibros
                              on libro.Iidtipolibro equals tipolibro.Iidtipolibro
@@ -36,10 +46,12 @@ namespace BlazorAppGianniCV.API.Controllers
                                  idtipolibro=(int) libro.Iidtipolibro!,
                                  idautor=(int) libro.Iidautor!
                              }).ToList();
+                _logger.LogInformation("Se recuperaron {Count} libros con éxito.", lista.Count); //LOG
                 return Ok(lista);
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "ERROR CRÍTICO al listar libros.");
                 return StatusCode(500, ex.Message);
             }
         }
@@ -82,17 +94,22 @@ namespace BlazorAppGianniCV.API.Controllers
                 var obj = bd.Libros.Where(p => p.Iidlibro == idLibro).FirstOrDefault();
                 if (obj == null)
                 {
+                    _logger.LogWarning("Intento de eliminación fallido: Libro no encontrado con ID: {Id}", idLibro); //Log Warning
                     return NotFound();
+                   
                 }
                 else
                 {
                     obj.Bhabilitado = 0;
                     bd.SaveChanges();
+
+                    _logger.LogInformation("Libro eliminado lógicamente. ID: {Id}", idLibro); //Log Eliminación
                     return Ok("Se elimino correctamente");
                 }
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "ERROR al intentar eliminar el libro ID: {Id}", idLibro); //Log de Error
                 return StatusCode(500, ex.Message);
             }
         }
@@ -116,12 +133,14 @@ namespace BlazorAppGianniCV.API.Controllers
                     oLibro.Bhabilitado = 1;
                     bd.Libros.Add(oLibro);
                     bd.SaveChanges();
+                    _logger.LogInformation("NUEVO LIBRO creado. Título: {Titulo}", oLibroFormCLS.titulo); //Log Creación
                 }
                 else
                 {
                     var obj = bd.Libros.Where(p => p.Iidlibro == oLibroFormCLS.idLibro).FirstOrDefault();
                     if (obj == null)
                     {
+                        _logger.LogWarning("Intento de actualización fallido: Libro no encontrado con ID: {Id}", oLibroFormCLS.idLibro); //Log Warning
                         return NotFound();
                     }
                     else
@@ -136,6 +155,8 @@ namespace BlazorAppGianniCV.API.Controllers
                         obj.Numpaginas = oLibroFormCLS.numeropaginas;
                         obj.Stock = oLibroFormCLS.stock;
                         bd.SaveChanges();
+
+                        _logger.LogInformation("Libro actualizado. ID: {Id}, Título: {Titulo}", oLibroFormCLS.idLibro, oLibroFormCLS.titulo); //Log Actualización
                         return Ok("Se actualizo correctamente");
                     }
                 }
@@ -143,6 +164,7 @@ namespace BlazorAppGianniCV.API.Controllers
             }
             catch (Exception ex)
             {
+                _logger.LogError(ex, "ERROR al guardar/actualizar el libro ID: {Id}", oLibroFormCLS.idLibro); //Log de Error
                 return StatusCode(500, ex.Message);
             }
         }
